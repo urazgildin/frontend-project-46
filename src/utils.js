@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { cwd } from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 const isAbsolute = (path) => path.startsWith('/');
 
@@ -17,4 +18,12 @@ const getParsedData = (path) => {
   return parsedData;
 };
 
-export { isAbsolute, getAbsolutePath, getParsedData };
+const getFixturePath = (filename) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  return join(__dirname, '..', '__fixtures__', filename);
+};
+
+const readFixtureFile = (filename) => readFileSync(getFixturePath(filename), 'utf8').trim();
+
+export { getAbsolutePath, getParsedData, readFixtureFile };

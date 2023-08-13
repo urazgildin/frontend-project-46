@@ -2,12 +2,12 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "[![Actions Status](https://github.com/urazgildin/frontend-project-46/workflows/hexlet-check/badge.svg)](https://github.com/urazgildin/frontend-project-46/actions)",
-  "main": "index.js",
+  "main": "gendiff.js",
   "bin": {
     "gendiff": "bin/gendiff.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx jest"
   },
   "author": "Urazgildin Anton",
   "license": "ISC",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "eslint": "^8.46.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.28.0"
+    "eslint-plugin-import": "^2.28.0",
+    "jest": "^29.6.2"
   }
 }
