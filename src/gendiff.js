@@ -2,10 +2,8 @@ import _ from 'lodash';
 import { getAbsolutePath, getParsedData } from './utils.js';
 
 const getDifferencies = (filepath1, filepath2) => {
-  const absolutePath1 = getAbsolutePath(filepath1);
-  const absolutePath2 = getAbsolutePath(filepath2);
-  const obj1 = getParsedData(absolutePath1);
-  const obj2 = getParsedData(absolutePath2);
+  const obj1 = getParsedData(getAbsolutePath(filepath1));
+  const obj2 = getParsedData(getAbsolutePath(filepath2));
 
   const keys = [...Object.keys(obj1), ...Object.keys(obj2)];
   const sortedKeys = _.sortBy(keys);
