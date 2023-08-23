@@ -1,9 +1,14 @@
+import { readFileSync } from 'node:fs';
+import { extname } from 'node:path';
 import _ from 'lodash';
-import { getAbsolutePath, getParsedData } from './utils.js';
+import { getAbsolutePath } from './utils.js';
+import getParsedData from './parsers.js';
 
 const getDifferencies = (filepath1, filepath2) => {
-  const obj1 = getParsedData(getAbsolutePath(filepath1));
-  const obj2 = getParsedData(getAbsolutePath(filepath2));
+  const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
+  const data2 = readFileSync(getAbsolutePath(filepath2), 'utf8');
+  const obj1 = getParsedData(data1, extname(filepath1));
+  const obj2 = getParsedData(data2, extname(filepath2));
 
   const uniqKeys = _.union(Object.keys(obj1), Object.keys(obj2));
   const sortedKeys = _.sortBy(uniqKeys);

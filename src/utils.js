@@ -12,12 +12,6 @@ const getAbsolutePath = (path) => {
   return path;
 };
 
-const getParsedData = (path) => {
-  const data = readFileSync(path, 'utf8');
-  const parsedData = JSON.parse(data);
-  return parsedData;
-};
-
 const getFixturePath = (filename) => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
@@ -26,4 +20,4 @@ const getFixturePath = (filename) => {
 
 const readFixtureFile = (filename) => readFileSync(getFixturePath(filename), 'utf8').trim();
 
-export { getAbsolutePath, getParsedData, readFixtureFile };
+export { getAbsolutePath, readFixtureFile };
