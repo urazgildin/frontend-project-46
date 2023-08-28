@@ -1,9 +1,0 @@
-{
-  "setting1": "Value 1",
-  "setting2": 300,
-  "setting3": false,
-  "setting6": {
-    "key": "value",
-    "doge": "fox"
-  }
-}
