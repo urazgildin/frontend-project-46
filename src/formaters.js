@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import getDifferencies from './recursiveGendiff.js';
 
 const stringify = (object, startedDepth) => {
   const iter = (obj, depth) => {
@@ -47,7 +46,6 @@ const stylish = (difference) => {
     const stylishedDiff = mappedColl.join('\n');
     return `{\n${stylishedDiff}\n${bracketIndent}}`;
   };
-  console.log(iter(difference, 1));
   return iter(difference, 1);
 };
 
