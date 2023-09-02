@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { getAbsolutePath } from './utils.js';
 import getParsedData from './parsers.js';
 import stylish from './formatters/stylish.js';
+import plain from './formatters/plain.js';
 
 const getDifferencies = (filepath1, filepath2, formater = stylish) => {
   const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
