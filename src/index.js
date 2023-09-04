@@ -3,10 +3,9 @@ import { extname } from 'node:path';
 import _ from 'lodash';
 import { getAbsolutePath } from './utils.js';
 import getParsedData from './parsers.js';
-import stylish from './formatters/stylish.js';
-import plain from './formatters/plain.js';
+import chooseFormater from './formatters/index.js';
 
-const getDifferencies = (filepath1, filepath2, formater = stylish) => {
+const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
   const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
   const data2 = readFileSync(getAbsolutePath(filepath2), 'utf8');
   const obj1 = getParsedData(data1, extname(filepath1));
@@ -30,7 +29,8 @@ const getDifferencies = (filepath1, filepath2, formater = stylish) => {
     }, []);
     return collOfDifferences;
   };
-  return formater(iter(obj1, obj2));
+  const diff = iter(obj1, obj2);
+  return chooseFormater(diff, formater);
 };
 
 export default getDifferencies;
