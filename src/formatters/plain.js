@@ -6,68 +6,52 @@ const builtPath = (currentPath, key) => {
   return newArr.join('.');
 };
 
-const textWnenAdded = (key, value) => {
-  let valueRed;
+const convertToCorrectForm = (value) => {
   if (typeof value === 'string' && value !== '[complex value]') {
-    valueRed = `'${value}'`;
-  } else {
-    valueRed = value;
+    return `'${value}'`;
   }
-  return `Property '${key}' was added with value: ${valueRed}`;
+  return value;
 };
 
+const textWnenAdded = (key, value) => `Property '${key}' was added with value: ${convertToCorrectForm(value)}`;
 const textWnenRemoved = (key) => `Property '${key}' was removed`;
-const textWnenUpdated = (key, value1, value2) => {
-  let value1Red;
-  let value2Red;
-  if (typeof value1 === 'string' && value1 !== '[complex value]') {
-    value1Red = `'${value1}'`;
-  } else {
-    value1Red = value1;
-  }
-  if (typeof value2 === 'string' && value2 !== '[complex value]') {
-    value2Red = `'${value2}'`;
-  } else {
-    value2Red = value2;
-  }
-  return `Property '${key}' was updated. From ${value1Red} to ${value2Red}`;
-};
+const textWnenUpdated = (key, value1, value2) => `Property '${key}' was updated. From ${convertToCorrectForm(value1)} to ${convertToCorrectForm(value2)}`;
 
-const makeCorrect = (value) => {
+const convertComplexValue = (value) => {
   if (_.isObject(value)) {
     return '[complex value]';
   }
   return value;
 };
 
-const plain = (diff) => {
-  const iter = (difff, currentPath) => {
-    const fiteredColl = difff.filter(({ type }) => type !== 'unchanged');
-    const mappedColl = fiteredColl.flatMap(({
+const plain = (difference) => {
+  const iter = (diff, ancestors) => {
+    const fiteredDiff = diff.filter(({ type }) => type !== 'unchanged');
+    const plainDiff = fiteredDiff.flatMap(({
       key, value, value1, value2, type,
     }) => {
       if (type !== 'nested') {
         if (type === 'added') {
-          return textWnenAdded(builtPath(currentPath, key), makeCorrect(value));
+          return textWnenAdded(builtPath(ancestors, key), convertComplexValue(value));
         }
         if (type === 'deleted') {
-          return textWnenRemoved(builtPath(currentPath, key));
+          return textWnenRemoved(builtPath(ancestors, key));
         }
         if (type === 'changed') {
           return textWnenUpdated(
-            builtPath(currentPath, key),
-            makeCorrect(value1),
-            makeCorrect(value2),
+            builtPath(ancestors, key),
+            convertComplexValue(value1),
+            convertComplexValue(value2),
           );
         }
       }
-      const newColl = [...currentPath];
-      newColl.push(key);
-      return iter(value, newColl);
+      const copyOfAncestors = [...ancestors];
+      copyOfAncestors.push(key);
+      return iter(value, copyOfAncestors);
     });
-    return mappedColl.join('\n');
+    return plainDiff.join('\n');
   };
-  return iter(diff, []);
+  return iter(difference, []);
 };
 
 export default plain;
