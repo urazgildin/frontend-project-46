@@ -43,7 +43,9 @@ const makeCorrect = (value) => {
 const plain = (diff) => {
   const iter = (difff, currentPath) => {
     const fiteredColl = difff.filter(({ type }) => type !== 'unchanged');
-    const mappedColl = fiteredColl.flatMap(({ key, value, value1, value2, type }) => {
+    const mappedColl = fiteredColl.flatMap(({
+      key, value, value1, value2, type,
+    }) => {
       if (type !== 'nested') {
         if (type === 'added') {
           return textWnenAdded(builtPath(currentPath, key), makeCorrect(value));
@@ -52,7 +54,11 @@ const plain = (diff) => {
           return textWnenRemoved(builtPath(currentPath, key));
         }
         if (type === 'changed') {
-          return textWnenUpdated(builtPath(currentPath, key), makeCorrect(value1), makeCorrect(value2));
+          return textWnenUpdated(
+            builtPath(currentPath, key),
+            makeCorrect(value1),
+            makeCorrect(value2),
+          );
         }
       }
       const newColl = [...currentPath];

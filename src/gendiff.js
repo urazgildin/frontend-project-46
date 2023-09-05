@@ -18,10 +18,15 @@ const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
         acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'added' });
       } else if (!Object.hasOwn(ob2, uniqKey)) {
         acc.push({ key: uniqKey, value: ob1[uniqKey], type: 'deleted' });
-      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey) && _.isEqual(ob1[uniqKey], ob2[uniqKey])) {
+      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
+      && _.isEqual(ob1[uniqKey], ob2[uniqKey])) {
         acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'unchanged' });
-      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey) && !_.isEqual(ob1[uniqKey], ob2[uniqKey]) && (!_.isObject(ob1[uniqKey]) || !_.isObject(ob2[uniqKey]))) {
-        acc.push({ key: uniqKey, value1: ob1[uniqKey], value2: ob2[uniqKey], type: 'changed' });
+      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
+      && !_.isEqual(ob1[uniqKey], ob2[uniqKey])
+      && (!_.isObject(ob1[uniqKey]) || !_.isObject(ob2[uniqKey]))) {
+        acc.push({
+          key: uniqKey, value1: ob1[uniqKey], value2: ob2[uniqKey], type: 'changed',
+        });
       } else {
         acc.push({ key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' });
       }

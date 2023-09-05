@@ -9,11 +9,11 @@ const stringify = (value, startedDepth) => {
     const currentIndent = ' '.repeat(startedDepth * spacesNumber + spacesNumber * depth);
     const bracketIndent = ' '.repeat(startedDepth * spacesNumber + (spacesNumber * depth - spacesNumber));
     const collOfKeysValues = Object.entries(currentValue);
-    const mappedColl = collOfKeysValues.map(([key, value]) => {
-      if (!_.isObject(value)) {
-        return `${currentIndent}${key}: ${value}`;
+    const mappedColl = collOfKeysValues.map(([key, newValue]) => {
+      if (!_.isObject(newValue)) {
+        return `${currentIndent}${key}: ${newValue}`;
       }
-      return `${currentIndent}${key}: ${iter(value, depth + 1)}`;
+      return `${currentIndent}${key}: ${iter(newValue, depth + 1)}`;
     });
     const stringifiedColl = mappedColl.join('\n');
     return `{\n${stringifiedColl}\n${bracketIndent}}`;
@@ -26,7 +26,9 @@ const stylish = (difference) => {
     const spacesNumber = 4;
     const currentIndent = (leftMargin) => ' '.repeat(spacesNumber * depth - leftMargin);
     const bracketIndent = ' '.repeat(spacesNumber * depth - spacesNumber);
-    const mappedColl = diff.map(({ key, value, value1, value2, type }) => {
+    const mappedColl = diff.map(({
+      key, value, value1, value2, type,
+    }) => {
       if (type !== 'nested') {
         if (type === 'added') {
           return `${currentIndent(2)}+ ${key}: ${stringify(value, depth)}`;
