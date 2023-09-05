@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import getDifferencies from '../index.js';
 
 const builtPath = (currentPath, key) => {
   const newArr = [...currentPath];

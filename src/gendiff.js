@@ -3,36 +3,34 @@ import { extname } from 'node:path';
 import _ from 'lodash';
 import { getAbsolutePath } from './utils.js';
 import getParsedData from './parsers.js';
+import chooseFormater from './formatters/index.js';
 
-const getDifferencies = (filepath1, filepath2) => {
+const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
   const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
   const data2 = readFileSync(getAbsolutePath(filepath2), 'utf8');
   const obj1 = getParsedData(data1, extname(filepath1));
   const obj2 = getParsedData(data2, extname(filepath2));
-
-  const uniqKeys = _.union(Object.keys(obj1), Object.keys(obj2));
-  const sortedKeys = _.sortBy(uniqKeys);
-
-  const resultAsArr = sortedKeys.reduce((acc, key) => {
-    if (!Object.hasOwn(obj1, key)) {
-      acc.push(`+ ${key}: ${obj2[key]}`);
-    }
-    if (!Object.hasOwn(obj2, key)) {
-      acc.push(`- ${key}: ${obj1[key]}`);
-    }
-    if (Object.hasOwn(obj1, key) && Object.hasOwn(obj2, key)) {
-      if (!_.isEqual(obj1[key], obj2[key])) {
-        acc.push(`- ${key}: ${obj1[key]}`, `+ ${key}: ${obj2[key]}`);
+  const iter = (ob1, ob2) => {
+    const uniqKeys = _.union(Object.keys(ob1), Object.keys(ob2));
+    const sortedUniqKeys = _.sortBy(uniqKeys);
+    const collOfDifferences = sortedUniqKeys.reduce((acc, uniqKey) => {
+      if (!Object.hasOwn(ob1, uniqKey)) {
+        acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'added' });
+      } else if (!Object.hasOwn(ob2, uniqKey)) {
+        acc.push({ key: uniqKey, value: ob1[uniqKey], type: 'deleted' });
+      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey) && _.isEqual(ob1[uniqKey], ob2[uniqKey])) {
+        acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'unchanged' });
+      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey) && !_.isEqual(ob1[uniqKey], ob2[uniqKey]) && (!_.isObject(ob1[uniqKey]) || !_.isObject(ob2[uniqKey]))) {
+        acc.push({ key: uniqKey, value1: ob1[uniqKey], value2: ob2[uniqKey], type: 'changed' });
       } else {
-        acc.push(`  ${key}: ${obj1[key]}`);
+        acc.push({ key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' });
       }
-    }
-    return acc;
-  }, []);
-
-  const resultAsString = resultAsArr.join('\n  ');
-  console.log(`{\n  ${resultAsString}\n}`);
-  return `{\n  ${resultAsString}\n}`;
+      return acc;
+    }, []);
+    return collOfDifferences;
+  };
+  const diff = iter(obj1, obj2);
+  return chooseFormater(diff, formater);
 };
 
 export default getDifferencies;
