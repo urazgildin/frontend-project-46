@@ -1,14 +1,16 @@
 import yaml from 'js-yaml';
 
-const getParsedData = (data, fileExt) => {
-  let parsedData;
-  if (fileExt === '.json') {
-    parsedData = JSON.parse(data);
+const getData = (data, fileExt) => {
+  switch (fileExt) {
+    case '.json':
+      return JSON.parse(data);
+    case '.yaml':
+      return yaml.load(data);
+    case '.yml':
+      return yaml.load(data);
+    default:
+      throw new Error(`${fileExt} is invalid extention`);
   }
-  if (fileExt === '.yaml' || fileExt === '.yml') {
-    parsedData = yaml.load(data);
-  }
-  return parsedData;
 };
 
-export default getParsedData;
+export default getData;

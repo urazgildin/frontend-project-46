@@ -1,15 +1,24 @@
 import { readFileSync } from 'node:fs';
-import { extname } from 'node:path';
+import { extname, resolve } from 'node:path';
+import { cwd } from 'node:process';
 import _ from 'lodash';
-import { getAbsolutePath } from './utils.js';
-import getParsedData from './parsers.js';
+import getData from './parsers.js';
 import chooseFormater from './formatters/index.js';
+
+const isAbsolute = (path) => path.startsWith('/');
+
+const getAbsolutePath = (path) => {
+  if (!isAbsolute(path)) {
+    return resolve(cwd(), path);
+  }
+  return path;
+};
 
 const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
   const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
   const data2 = readFileSync(getAbsolutePath(filepath2), 'utf8');
-  const obj1 = getParsedData(data1, extname(filepath1));
-  const obj2 = getParsedData(data2, extname(filepath2));
+  const obj1 = getData(data1, extname(filepath1));
+  const obj2 = getData(data2, extname(filepath2));
   const iter = (ob1, ob2) => {
     const uniqKeys = _.union(Object.keys(ob1), Object.keys(ob2));
     const sortedUniqKeys = _.sortBy(uniqKeys);
