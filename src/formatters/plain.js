@@ -4,8 +4,7 @@ import {
 } from '../selectors.js';
 
 const builtPath = (currentPath, key) => {
-  const newArr = [...currentPath];
-  newArr.push(key);
+  const newArr = [...currentPath, key];
   return newArr.join('.');
 };
 
@@ -51,8 +50,7 @@ const plain = (difference) => {
           );
         }
       }
-      const copyOfAncestors = [...ancestors];
-      copyOfAncestors.push(key);
+      const copyOfAncestors = [...ancestors, key];
       return iter(value, copyOfAncestors);
     });
     return plainDiff.join('\n');

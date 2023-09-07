@@ -27,25 +27,26 @@ const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
   const iter = (ob1, ob2) => {
     const uniqKeys = _.union(Object.keys(ob1), Object.keys(ob2));
     const sortedUniqKeys = _.sortBy(uniqKeys);
-    const collOfDifferences = sortedUniqKeys.reduce((acc, uniqKey) => {
+    const collOfDifferences = sortedUniqKeys.map((uniqKey) => {
       if (!Object.hasOwn(ob1, uniqKey)) {
-        acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'added' });
-      } else if (!Object.hasOwn(ob2, uniqKey)) {
-        acc.push({ key: uniqKey, value: ob1[uniqKey], type: 'deleted' });
-      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
+        return { key: uniqKey, value: ob2[uniqKey], type: 'added' };
+      }
+      if (!Object.hasOwn(ob2, uniqKey)) {
+        return { key: uniqKey, value: ob1[uniqKey], type: 'deleted' };
+      }
+      if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
       && _.isEqual(ob1[uniqKey], ob2[uniqKey])) {
-        acc.push({ key: uniqKey, value: ob2[uniqKey], type: 'unchanged' });
-      } else if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
+        return { key: uniqKey, value: ob2[uniqKey], type: 'unchanged' };
+      }
+      if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
       && !_.isEqual(ob1[uniqKey], ob2[uniqKey])
       && (!_.isObject(ob1[uniqKey]) || !_.isObject(ob2[uniqKey]))) {
-        acc.push({
+        return {
           key: uniqKey, value1: ob1[uniqKey], value2: ob2[uniqKey], type: 'changed',
-        });
-      } else {
-        acc.push({ key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' });
+        };
       }
-      return acc;
-    }, []);
+      return { key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' };
+    });
     return collOfDifferences;
   };
   const diff = iter(obj1, obj2);
