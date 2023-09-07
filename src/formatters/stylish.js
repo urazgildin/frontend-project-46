@@ -1,19 +1,25 @@
 import _ from 'lodash';
+import {
+  getType, getKey, getValue, getValue1, getValue2,
+} from '../selectors.js';
+
+const getCurrentIndent = (spacesNumber, depth, leftMargin = 0, startedDepth = 0) => ' '.repeat(spacesNumber * (startedDepth + depth) - leftMargin);
+
+const getBracketIndent = (spacesNumber, depth, startedDepth = 0) => ' '.repeat(spacesNumber * (startedDepth + depth) - spacesNumber);
 
 const stringify = (value, startedDepth) => {
   const iter = (currentValue, depth) => {
     if (!_.isObject(currentValue)) {
       return currentValue;
     }
-    const spacesNumber = 4;
-    const currentIndent = ' '.repeat(startedDepth * spacesNumber + spacesNumber * depth);
-    const bracketIndent = ' '.repeat(startedDepth * spacesNumber + (spacesNumber * depth - spacesNumber));
+    const currentIndent = getCurrentIndent(4, depth, 0, startedDepth);
+    const bracketIndent = getBracketIndent(4, depth, startedDepth);
     const collOfKeysValues = Object.entries(currentValue);
-    const mappedColl = collOfKeysValues.map(([key, newValue]) => {
-      if (!_.isObject(newValue)) {
-        return `${currentIndent}${key}: ${newValue}`;
+    const mappedColl = collOfKeysValues.map(([key, val]) => {
+      if (!_.isObject(val)) {
+        return `${currentIndent}${key}: ${val}`;
       }
-      return `${currentIndent}${key}: ${iter(newValue, depth + 1)}`;
+      return `${currentIndent}${key}: ${iter(val, depth + 1)}`;
     });
     const stringifiedColl = mappedColl.join('\n');
     return `{\n${stringifiedColl}\n${bracketIndent}}`;
@@ -23,27 +29,29 @@ const stringify = (value, startedDepth) => {
 
 const stylish = (difference) => {
   const iter = (diff, depth) => {
-    const spacesNumber = 4;
-    const currentIndent = (leftMargin) => ' '.repeat(spacesNumber * depth - leftMargin);
-    const bracketIndent = ' '.repeat(spacesNumber * depth - spacesNumber);
-    const mappedColl = diff.map(({
-      key, value, value1, value2, type,
-    }) => {
+    const bracketIndent = getBracketIndent(4, depth);
+    const mappedColl = diff.map((item) => {
+      const type = getType(item);
+      const key = getKey(item);
+      const value = getValue(item);
+      const value1 = getValue1(item);
+      const value2 = getValue2(item);
+
       if (type !== 'nested') {
         if (type === 'added') {
-          return `${currentIndent(2)}+ ${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(4, depth, 2)}+ ${key}: ${stringify(value, depth)}`;
         }
         if (type === 'deleted') {
-          return `${currentIndent(2)}- ${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(4, depth, 2)}- ${key}: ${stringify(value, depth)}`;
         }
         if (type === 'unchanged') {
-          return `${currentIndent(0)}${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(4, depth)}${key}: ${stringify(value, depth)}`;
         }
         if (type === 'changed' && !_.isObject(value)) {
-          return `${currentIndent(2)}- ${key}: ${stringify(value1, depth)}\n${currentIndent(2)}+ ${key}: ${stringify(value2, depth)}`;
+          return `${getCurrentIndent(4, depth, 2)}- ${key}: ${stringify(value1, depth)}\n${getCurrentIndent(4, depth, 2)}+ ${key}: ${stringify(value2, depth)}`;
         }
       }
-      return `${currentIndent(0)}${key}: ${iter(value, depth + 1)}`;
+      return `${getCurrentIndent(4, depth)}${key}: ${iter(value, depth + 1)}`;
     });
     const stylishedDiff = mappedColl.join('\n');
     return `{\n${stylishedDiff}\n${bracketIndent}}`;

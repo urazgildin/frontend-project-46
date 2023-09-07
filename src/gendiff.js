@@ -14,11 +14,16 @@ const getAbsolutePath = (path) => {
   return path;
 };
 
+const convertToObject = (path) => {
+  const absolutePath = getAbsolutePath(path);
+  const data = readFileSync(absolutePath, 'utf8');
+  const obj = getData(data, extname(path));
+  return obj;
+};
+
 const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
-  const data1 = readFileSync(getAbsolutePath(filepath1), 'utf8');
-  const data2 = readFileSync(getAbsolutePath(filepath2), 'utf8');
-  const obj1 = getData(data1, extname(filepath1));
-  const obj2 = getData(data2, extname(filepath2));
+  const obj1 = convertToObject(filepath1);
+  const obj2 = convertToObject(filepath2);
   const iter = (ob1, ob2) => {
     const uniqKeys = _.union(Object.keys(ob1), Object.keys(ob2));
     const sortedUniqKeys = _.sortBy(uniqKeys);

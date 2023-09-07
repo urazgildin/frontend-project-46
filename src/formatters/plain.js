@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import {
+  getType, getKey, getValue, getValue1, getValue2,
+} from '../selectors.js';
 
 const builtPath = (currentPath, key) => {
   const newArr = [...currentPath];
@@ -26,10 +29,13 @@ const convertComplexValue = (value) => {
 
 const plain = (difference) => {
   const iter = (diff, ancestors) => {
-    const fiteredDiff = diff.filter(({ type }) => type !== 'unchanged');
-    const plainDiff = fiteredDiff.flatMap(({
-      key, value, value1, value2, type,
-    }) => {
+    const fiteredDiff = diff.filter((item) => getType(item) !== 'unchanged');
+    const plainDiff = fiteredDiff.flatMap((item) => {
+      const type = getType(item);
+      const key = getKey(item);
+      const value = getValue(item);
+      const value1 = getValue1(item);
+      const value2 = getValue2(item);
       if (type !== 'nested') {
         if (type === 'added') {
           return textWnenAdded(builtPath(ancestors, key), convertComplexValue(value));

@@ -5,6 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d65e2b9bf3b9317e0d71/test_coverage)](https://codeclimate.com/github/urazgildin/frontend-project-46/test_coverage)
 
 This project was created as a second project of frontend-development educational course. It is a cli-utility which takes paths to two json or yaml format files and get out difference between them. 
+
 There are several formaters to display: 
 * **stylish** (default one) 
 * **plain**
