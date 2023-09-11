@@ -1,3 +1,3 @@
-import getDifferencies from './src/gendiff.js';
+import getDifferencies from './src/index.js';
 
 export default getDifferencies;
