@@ -2,23 +2,21 @@ import { readFileSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { cwd } from 'node:process';
 import _ from 'lodash';
-import getData from './parsers.js';
+import parseData from './parsers.js';
 import chooseFormater from './formatters/index.js';
 
-const isAbsolute = (path) => path.startsWith('/');
+const getAbsolutePath = (path) => resolve(cwd(), path);
 
-const getAbsolutePath = (path) => {
-  if (!isAbsolute(path)) {
-    return resolve(cwd(), path);
-  }
-  return path;
+const getData = (path) => {
+  const absolutePath = getAbsolutePath(path);
+  const data = readFileSync(absolutePath, 'utf8');
+  return data;
 };
 
 const convertToObject = (path) => {
-  const absolutePath = getAbsolutePath(path);
-  const data = readFileSync(absolutePath, 'utf8');
-  const obj = getData(data, extname(path));
-  return obj;
+  const data = getData(path);
+  const typeOfFile = extname(path).slice(1);
+  return parseData(data, typeOfFile);
 };
 
 const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
@@ -34,18 +32,15 @@ const getDifferencies = (filepath1, filepath2, formater = 'stylish') => {
       if (!Object.hasOwn(ob2, uniqKey)) {
         return { key: uniqKey, value: ob1[uniqKey], type: 'deleted' };
       }
-      if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
-      && _.isEqual(ob1[uniqKey], ob2[uniqKey])) {
-        return { key: uniqKey, value: ob2[uniqKey], type: 'unchanged' };
+      if (_.isPlainObject(ob1[uniqKey]) && _.isPlainObject(ob2[uniqKey])) {
+        return { key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' };
       }
-      if (Object.hasOwn(ob1, uniqKey) && Object.hasOwn(ob2, uniqKey)
-      && !_.isEqual(ob1[uniqKey], ob2[uniqKey])
-      && (!_.isObject(ob1[uniqKey]) || !_.isObject(ob2[uniqKey]))) {
+      if (!_.isEqual(ob1[uniqKey], ob2[uniqKey])) {
         return {
           key: uniqKey, value1: ob1[uniqKey], value2: ob2[uniqKey], type: 'changed',
         };
       }
-      return { key: uniqKey, value: iter(ob1[uniqKey], ob2[uniqKey]), type: 'nested' };
+      return { key: uniqKey, value: ob2[uniqKey], type: 'unchanged' };
     });
     return collOfDifferences;
   };

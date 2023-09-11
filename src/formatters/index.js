@@ -1,20 +1,22 @@
 import stylish from './stylish.js';
 import plain from './plain.js';
-import json from './json.js';
+
+const generateObject = () => ({
+  stylish: function makeStylish(data) {
+    return stylish(data);
+  },
+  plain: function makePlain(data) {
+    return plain(data);
+  },
+  json: function makeJson(data) {
+    return JSON.stringify(data);
+  },
+});
 
 const chooseFormater = (diff, formater) => {
-  switch (formater) {
-    case 'stylish':
-      return stylish(diff);
-    case 'plain':
-      return plain(diff);
-    case 'json':
-      return json(diff);
-    case 'bare':
-      return diff;
-    default:
-      throw new Error(`output format ${formater} not found`);
-  }
+  const objOfFunctions = generateObject();
+  const func = objOfFunctions[formater];
+  return func(diff);
 };
 
 export default chooseFormater;

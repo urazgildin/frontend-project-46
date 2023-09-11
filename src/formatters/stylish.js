@@ -1,10 +1,6 @@
 import _ from 'lodash';
-import {
-  getType, getKey, getValue, getValue1, getValue2,
-} from '../selectors.js';
 
 const getCurrentIndent = (spacesNumber, depth, leftMargin = 0, startedDepth = 0) => ' '.repeat(spacesNumber * (startedDepth + depth) - leftMargin);
-
 const getBracketIndent = (spacesNumber, depth, startedDepth = 0) => ' '.repeat(spacesNumber * (startedDepth + depth) - spacesNumber);
 
 const stringify = (value, startedDepth) => {
@@ -30,28 +26,21 @@ const stringify = (value, startedDepth) => {
 const stylish = (difference) => {
   const iter = (diff, depth) => {
     const bracketIndent = getBracketIndent(4, depth);
-    const mappedColl = diff.map((item) => {
-      const type = getType(item);
-      const key = getKey(item);
-      const value = getValue(item);
-      const value1 = getValue1(item);
-      const value2 = getValue2(item);
-
-      if (type !== 'nested') {
-        if (type === 'added') {
+    const mappedColl = diff.map(({
+      type, key, value, value1, value2,
+    }) => {
+      switch (type) {
+        case 'added':
           return `${getCurrentIndent(4, depth, 2)}+ ${key}: ${stringify(value, depth)}`;
-        }
-        if (type === 'deleted') {
+        case 'deleted':
           return `${getCurrentIndent(4, depth, 2)}- ${key}: ${stringify(value, depth)}`;
-        }
-        if (type === 'unchanged') {
+        case 'unchanged':
           return `${getCurrentIndent(4, depth)}${key}: ${stringify(value, depth)}`;
-        }
-        if (type === 'changed' && !_.isObject(value)) {
+        case 'changed':
           return `${getCurrentIndent(4, depth, 2)}- ${key}: ${stringify(value1, depth)}\n${getCurrentIndent(4, depth, 2)}+ ${key}: ${stringify(value2, depth)}`;
-        }
+        default:
+          return `${getCurrentIndent(4, depth)}${key}: ${iter(value, depth + 1)}`;
       }
-      return `${getCurrentIndent(4, depth)}${key}: ${iter(value, depth + 1)}`;
     });
     const stylishedDiff = mappedColl.join('\n');
     return `{\n${stylishedDiff}\n${bracketIndent}}`;

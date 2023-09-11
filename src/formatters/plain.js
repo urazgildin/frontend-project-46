@@ -1,7 +1,4 @@
 import _ from 'lodash';
-import {
-  getType, getKey, getValue, getValue1, getValue2,
-} from '../selectors.js';
 
 const builtPath = (currentPath, key) => {
   const newArr = [...currentPath, key];
@@ -28,30 +25,24 @@ const convertComplexValue = (value) => {
 
 const plain = (difference) => {
   const iter = (diff, ancestors) => {
-    const fiteredDiff = diff.filter((item) => getType(item) !== 'unchanged');
-    const plainDiff = fiteredDiff.flatMap((item) => {
-      const type = getType(item);
-      const key = getKey(item);
-      const value = getValue(item);
-      const value1 = getValue1(item);
-      const value2 = getValue2(item);
-      if (type !== 'nested') {
-        if (type === 'added') {
+    const fiteredDiff = diff.filter(({ type }) => type !== 'unchanged');
+    const plainDiff = fiteredDiff.flatMap(({
+      type, key, value, value1, value2,
+    }) => {
+      switch (type) {
+        case 'added':
           return textWnenAdded(builtPath(ancestors, key), convertComplexValue(value));
-        }
-        if (type === 'deleted') {
+        case 'deleted':
           return textWnenRemoved(builtPath(ancestors, key));
-        }
-        if (type === 'changed') {
+        case 'changed':
           return textWnenUpdated(
             builtPath(ancestors, key),
             convertComplexValue(value1),
             convertComplexValue(value2),
           );
-        }
+        default:
+          return iter(value, [...ancestors, key]);
       }
-      const copyOfAncestors = [...ancestors, key];
-      return iter(value, copyOfAncestors);
     });
     return plainDiff.join('\n');
   };

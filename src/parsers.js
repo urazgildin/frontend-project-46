@@ -1,16 +1,21 @@
 import yaml from 'js-yaml';
 
-const getData = (data, fileExt) => {
-  switch (fileExt) {
-    case '.json':
-      return JSON.parse(data);
-    case '.yaml':
-      return yaml.load(data);
-    case '.yml':
-      return yaml.load(data);
-    default:
-      throw new Error(`${fileExt} is invalid extention`);
-  }
+const generateObject = () => ({
+  json: function parseJson(data) {
+    return JSON.parse(data);
+  },
+  yaml: function parseYaml(data) {
+    return yaml.load(data);
+  },
+  yml: function parseYml(data) {
+    return yaml.load(data);
+  },
+});
+
+const parseData = (data, typeOfFile) => {
+  const objOfFunctions = generateObject();
+  const func = objOfFunctions[typeOfFile];
+  return func(data);
 };
 
-export default getData;
+export default parseData;
