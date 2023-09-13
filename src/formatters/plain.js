@@ -1,50 +1,43 @@
 import _ from 'lodash';
 
-const builtPath = (currentPath, key) => {
+const builtNameOfProperty = (currentPath, key) => {
   const newArr = [...currentPath, key];
   return newArr.join('.');
 };
 
-const convertToCorrectForm = (value) => {
-  if (typeof value === 'string' && value !== '[complex value]') {
+const stringify = (value) => {
+  if (_.isObject(value)) {
+    return '[complex value]';
+  }
+  if (typeof value === 'string') {
     return `'${value}'`;
   }
   return value;
 };
 
-const textWnenAdded = (key, value) => `Property '${key}' was added with value: ${convertToCorrectForm(value)}`;
-const textWnenRemoved = (key) => `Property '${key}' was removed`;
-const textWnenUpdated = (key, value1, value2) => `Property '${key}' was updated. From ${convertToCorrectForm(value1)} to ${convertToCorrectForm(value2)}`;
-
-const convertComplexValue = (value) => {
-  if (_.isObject(value)) {
-    return '[complex value]';
-  }
-  return value;
-};
+const textWnenAdded = (name, value) => `Property '${name}' was added with value: ${stringify(value)}\n`;
+const textWnenRemoved = (name) => `Property '${name}' was removed\n`;
+const textWnenUpdated = (name, value1, value2) => `Property '${name}' was updated. From ${stringify(value1)} to ${stringify(value2)}\n`;
 
 const plain = (difference) => {
   const iter = (diff, ancestors) => {
-    const fiteredDiff = diff.filter(({ type }) => type !== 'unchanged');
-    const plainDiff = fiteredDiff.flatMap(({
-      type, key, value, value1, value2,
+    const plainDiff = diff.flatMap(({
+      type, key, children, value, value1, value2,
     }) => {
       switch (type) {
+        case 'unchanged':
+          return null;
         case 'added':
-          return textWnenAdded(builtPath(ancestors, key), convertComplexValue(value));
+          return textWnenAdded(builtNameOfProperty(ancestors, key), value);
         case 'deleted':
-          return textWnenRemoved(builtPath(ancestors, key));
+          return textWnenRemoved(builtNameOfProperty(ancestors, key));
         case 'changed':
-          return textWnenUpdated(
-            builtPath(ancestors, key),
-            convertComplexValue(value1),
-            convertComplexValue(value2),
-          );
+          return textWnenUpdated(builtNameOfProperty(ancestors, key), value1, value2);
         default:
-          return iter(value, [...ancestors, key]);
+          return iter(children, [...ancestors, key]);
       }
     });
-    return plainDiff.join('\n');
+    return plainDiff.join('').replace(/\n$/, '');
   };
   return iter(difference, []);
 };

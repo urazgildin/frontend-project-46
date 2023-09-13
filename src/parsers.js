@@ -1,21 +1,11 @@
 import yaml from 'js-yaml';
 
-const generateObject = () => ({
-  json: function parseJson(data) {
-    return JSON.parse(data);
-  },
-  yaml: function parseYaml(data) {
-    return yaml.load(data);
-  },
-  yml: function parseYml(data) {
-    return yaml.load(data);
-  },
+const generateObjectOfParsers = () => ({
+  json: (data) => JSON.parse(data),
+  yaml: (data) => yaml.load(data),
+  yml: (data) => yaml.load(data),
 });
 
-const parseData = (data, typeOfFile) => {
-  const objOfFunctions = generateObject();
-  const func = objOfFunctions[typeOfFile];
-  return func(data);
-};
+const parseData = (data, typeOfFile) => generateObjectOfParsers()[typeOfFile](data);
 
 export default parseData;
