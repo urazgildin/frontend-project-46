@@ -37,9 +37,9 @@ const plain = (difference) => {
           return iter(children, [...ancestors, key]);
       }
     });
-    return plainDiff.join('').replace(/\n$/, '');
+    return plainDiff.join('');
   };
-  return iter(difference, []);
+  return iter(difference, []).replace(/\n$/, '');
 };
 
 export default plain;
