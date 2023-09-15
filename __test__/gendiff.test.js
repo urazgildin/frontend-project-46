@@ -13,17 +13,20 @@ const getFixturePath = (filename) => {
 const readFixtureFile = (filename) => readFileSync(getFixturePath(filename), 'utf8').trim();
 
 test.each([
-  ['__fixtures__/file3.json', '__fixtures__/file4.json', 'expectedFileStylish.txt', 'stylish'],
-  ['__fixtures__/file3.yaml', '__fixtures__/file4.yaml', 'expectedFileStylish.txt', 'stylish'],
-  ['__fixtures__/file3.yml', '__fixtures__/file4.yml', 'expectedFileStylish.txt', 'stylish'],
-  ['__fixtures__/file3.json', '__fixtures__/file4.json', 'expectedFilePlain.txt', 'plain'],
-  ['__fixtures__/file3.yaml', '__fixtures__/file4.yaml', 'expectedFilePlain.txt', 'plain'],
-  ['__fixtures__/file3.json', '__fixtures__/file4.json', 'expectedFileJson.txt', 'json'],
+  ['file3.json', 'file4.json', 'expectedFileStylish.txt', 'stylish'],
+  ['file3.yaml', 'file4.yaml', 'expectedFileStylish.txt', 'stylish'],
+  ['file3.yml', 'file4.yml', 'expectedFileStylish.txt', 'stylish'],
+  ['file3.json', 'file4.json', 'expectedFilePlain.txt', 'plain'],
+  ['file3.yaml', 'file4.yaml', 'expectedFilePlain.txt', 'plain'],
+  ['file3.json', 'file4.json', 'expectedFileJson.txt', 'json'],
 ])('get differencies of two files', (file1, file2, expected, formater) => {
-  expect(getDifferencies(file1, file2, formater)).toEqual(readFixtureFile(expected));
+  expect(getDifferencies(getFixturePath(file1), getFixturePath(file2), formater))
+    .toEqual(readFixtureFile(expected));
 });
 
-test('throw cases', () => {
-  expect(() => getDifferencies('__fixtures__/file1.txt', '__fixtures__/file2.txt')).toThrow();
-  expect(() => getDifferencies('__fixtures__/file3.json', '__fixtures__/file4.json', 'abcent')).toThrow();
+test.each([
+  ['file1.txt', 'file2.txt', 'stylish'],
+  ['file3.json', 'file4.json', 'abcent'],
+])('throw cases', (file1, file2, formater) => {
+  expect(() => getDifferencies(getFixturePath(file1), getFixturePath(file2), formater)).toThrow();
 });
