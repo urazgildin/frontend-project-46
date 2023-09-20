@@ -1,15 +1,15 @@
 import _ from 'lodash';
 
-const getCurrentIndent = (depth, leftMargin = 0, startedDepth = 0, spacesNumber = 4) => ' '.repeat(spacesNumber * (startedDepth + depth) - leftMargin);
-const getBracketIndent = (depth, startedDepth = 0, spacesNumber = 4) => ' '.repeat(spacesNumber * (startedDepth + depth) - spacesNumber);
+const getCurrentIndent = (depth, leftMargin = 2, spacesNumber = 4) => ' '.repeat(spacesNumber * depth - leftMargin);
+const getBracketIndent = (depth, spacesNumber = 4) => ' '.repeat(spacesNumber * depth - spacesNumber);
 
 const stringify = (value, startedDepth) => {
   const iter = (currentValue, depth) => {
     if (!_.isObject(currentValue)) {
       return currentValue;
     }
-    const currentIndent = getCurrentIndent(depth, 0, startedDepth);
-    const bracketIndent = getBracketIndent(depth, startedDepth);
+    const currentIndent = getCurrentIndent(depth + 1, 0);
+    const bracketIndent = getBracketIndent(depth + 1);
     const collOfKeysValues = Object.entries(currentValue);
     const mappedColl = collOfKeysValues.map(([key, val]) => {
       if (!_.isObject(val)) {
@@ -20,7 +20,7 @@ const stringify = (value, startedDepth) => {
     const stringifiedColl = mappedColl.join('\n');
     return `{\n${stringifiedColl}\n${bracketIndent}}`;
   };
-  return iter(value, 1);
+  return iter(value, startedDepth);
 };
 
 const stylish = (difference) => {
@@ -31,15 +31,17 @@ const stylish = (difference) => {
     }) => {
       switch (type) {
         case 'added':
-          return `${getCurrentIndent(depth, 2)}+ ${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(depth)}+ ${key}: ${stringify(value, depth)}`;
         case 'deleted':
-          return `${getCurrentIndent(depth, 2)}- ${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(depth)}- ${key}: ${stringify(value, depth)}`;
         case 'unchanged':
-          return `${getCurrentIndent(depth)}${key}: ${stringify(value, depth)}`;
+          return `${getCurrentIndent(depth, 0)}${key}: ${stringify(value, depth)}`;
         case 'changed':
-          return `${getCurrentIndent(depth, 2)}- ${key}: ${stringify(value1, depth)}\n${getCurrentIndent(depth, 2)}+ ${key}: ${stringify(value2, depth)}`;
+          return `${getCurrentIndent(depth)}- ${key}: ${stringify(value1, depth)}\n${getCurrentIndent(depth)}+ ${key}: ${stringify(value2, depth)}`;
+        case 'nested':
+          return `${getCurrentIndent(depth, 0)}${key}: ${iter(children, depth + 1)}`;
         default:
-          return `${getCurrentIndent(depth)}${key}: ${iter(children, depth + 1)}`;
+          throw new Error(`Unknown type: '${type}'!`);
       }
     });
     const stylishedDiff = mappedColl.join('\n');

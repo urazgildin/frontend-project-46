@@ -33,8 +33,10 @@ const plain = (difference) => {
           return textWnenRemoved(builtNameOfProperty(ancestors, key));
         case 'changed':
           return textWnenUpdated(builtNameOfProperty(ancestors, key), value1, value2);
-        default:
+        case 'nested':
           return iter(children, [...ancestors, key]);
+        default:
+          throw new Error(`Unknown type: '${type}'!`);
       }
     });
     return plainDiff.join('');
